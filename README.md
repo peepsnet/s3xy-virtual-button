@@ -1,3 +1,23 @@
+
+## 🚘 Enable Hands free autopilot
+This is a fork of https://github.com/Beat-YT/s3xy-virtual-button
+I added the code in main.cpp to work as follows:
+
+I changed the original code to work with a TTP223B Capacitive Touch Switch
+https://www.amazon.com/HiLetgo-TTP223B-Capacitive-Digital-Raspberry/dp/B00HFQEFWQ/
+
+When powered on... The system is OFF
+1. Single press of the switch calls:  s3xy_send_single();
+2. Double press of the switch calls:  s3xy_send_double();
+3. Long press of the switch calls:    s3xy_send_long();
+4. 3x press of the switch toggle system to start running.
+
+At random intervals from 9.5 sec to 12.5 sec the system will trigger a single button press.
+In the Enhance Auto App I have configures the Single Press to subtract 1 from the current Curse Control then Add 1 back to the Cruse Control.
+This resets the Nag timer.
+
+# ⚠️⚠️ This is never to be used in the real world!! This is just informational only. 
+```
 # 🟢 S3XY Virtual Button (ESP32)
 
 This is a simple ESP32 sketch that turns your dev board into a virtual *S3XY Button* — a BLE accessory that mimics Enhance Auto’s real button (`ENH_BTN`) device.
@@ -79,17 +99,3 @@ This sketch emulates the real button behavior:
 All UUIDs and byte patterns were captured and decoded from real ENH_BTN ↔ Commander traffic.
 
 > 🧪 Sniffing BLE traffic was done with nRF Connect + a rooted Android phone + wireshark
-
-
-## 💡 Usage
-
-Start with the provided `main.cpp` in the `src` folder. It's your playground.
-
-```cpp
-s3xy_on_connect(onConnected);       // your own LED blink, sound, etc
-s3xy_on_disconnect(onDisconnected);
-
-s3xy_send_single();                 // simulates tap (instant!)
-s3xy_send_long();                   // simulates hold
-s3xy_send_double();                 // simulates double tap
-```

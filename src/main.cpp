@@ -67,7 +67,7 @@ static void toggleOnOff() {
   powerSwitch = !powerSwitch;
   blinkLED(2);
   timeNow = millis();
-  Serial.println("LONG Clicked! Power Toggled!!");
+  Serial.println("3x Clicked! Power Toggled!!");
 }
 
 void onConnected() {

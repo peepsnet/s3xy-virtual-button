@@ -1,19 +1,19 @@
 
 ## 🚘 Enable Hands free autopilot
 This is a fork of https://github.com/Beat-YT/s3xy-virtual-button
-I added the code in main.cpp to work as follows:
+I added the code in main.cpp and platforms.ini to work as follows:
 
-I changed the original code to work with a TTP223B Capacitive Touch Switch
+I changed the original code to work with a TTP223B Capacitive Touch Switch but any button would work.
 https://www.amazon.com/HiLetgo-TTP223B-Capacitive-Digital-Raspberry/dp/B00HFQEFWQ/
 
 When powered on... The system is OFF
-1. Single press of the switch calls:  s3xy_send_single();
-2. Double press of the switch calls:  s3xy_send_double();
-3. Long press of the switch calls:    s3xy_send_long();
-4. 3x press of the switch toggle system to start running.
+1. Single press of the button calls:  s3xy_send_single();
+2. Double press of the button calls:  s3xy_send_double();
+3. Long press of the button calls:    s3xy_send_long();
+4. 3x press of the button toggle system to start running.
 
-At random intervals from 9.5 sec to 12.5 sec the system will trigger a single button press.
-In the Enhance Auto App I have configures the Single Press to subtract 1 from the current Curse Control then Add 1 back to the Cruse Control.
+When the systrm is turned on, at random intervals from 9.5 sec to 12.5 sec the system will trigger a single button press.
+In the Enhance Auto App I have configures the Single Press to subtract 1 from the current Cuirse Control then add 1 back to the Cruise Control.
 This resets the Nag timer.
 
 # ⚠️⚠️ This is never to be used in the real world!! This is just informational only. 

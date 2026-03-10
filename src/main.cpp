@@ -118,9 +118,10 @@ void loop() {
     btn.tick();   //Capture control button status
   
   if (millis() - timeNow > delayBy && powerSwitch) {
-    //Serial.println("Pressed: " + String((millis() - timeNow)*0.001) + "s");
+    Serial.println("Pressed: " + String((millis() - timeNow)*0.001) + "s");
     pressS3XYBtnNow();
     timeNow = millis();
     randomize();
-  Serial.println("Loop: " + String((millis() - timeNow)*0.001) + "s. D8 = " + digitalRead(INPIN));
+  }
+  //Serial.println("Loop: " + String((millis() - timeNow)*0.001) + "s. D8 = " + digitalRead(INPIN));
 }

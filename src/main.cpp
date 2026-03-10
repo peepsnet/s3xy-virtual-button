@@ -113,12 +113,14 @@ void loop() {
   //s3xy_loop();
 
   if (s3xy_ready() ) {
-    btn.tick();   //Capture control button status
-    
-    if (millis() - timeNow > delayBy && powerSwitch) {
-      pressS3XYBtnNow();
-      timeNow = millis();
-      randomize();
-    }
+    //save this for referance
   }
+    btn.tick();   //Capture control button status
+  
+  if (millis() - timeNow > delayBy && powerSwitch) {
+    //Serial.println("Pressed: " + String((millis() - timeNow)*0.001) + "s");
+    pressS3XYBtnNow();
+    timeNow = millis();
+    randomize();
+  Serial.println("Loop: " + String((millis() - timeNow)*0.001) + "s. D8 = " + digitalRead(INPIN));
 }

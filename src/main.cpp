@@ -30,12 +30,12 @@ static void setLED() {
   Serial.println("Power LED status set/reset!!");
 }
 
-static void blinkLED(int blink) {
+static void blinkLED(int blink, int dly = 75) {
   for (int i = 1; i <= blink; i++) {
     digitalWrite(LED_BUILTIN, HIGH);          //LED OFF
-    delay(75);
+    delay(dly);
     digitalWrite(LED_BUILTIN, LOW);           //LED ON
-    delay(75);
+    delay(dly);
     if (!powerSwitch) {
       digitalWrite(LED_BUILTIN,HIGH);           //LED OFF
       delay(75);
@@ -57,15 +57,15 @@ static void doubleClickS3XYButton() {
   Serial.println("S3XY Button Double Clicked!!");
 }
 
-static void multiClickS3XYButton() {
+static void longClickS3XYButton() {
   s3xy_send_long();
-  blinkLED(3);
+  blinkLED(1, 200);
   Serial.println("S3XY Button Long Clicked!!");
 }
 
 static void toggleOnOff() {
   powerSwitch = !powerSwitch;
-  blinkLED(2);
+  blinkLED(3);
   timeNow = millis();
   Serial.println("3x Clicked! Power Toggled!!");
 }
@@ -99,7 +99,7 @@ void setup() {
   btn.setup(INPIN, INPUT_PULLUP, false);
   btn.attachClick(pressS3XYBtnNow);
   btn.attachDoubleClick(doubleClickS3XYButton);
-  btn.attachLongPressStart(multiClickS3XYButton);
+  btn.attachLongPressStart(longClickS3XYButton);
   btn.attachMultiClick(toggleOnOff);
   btn.reset();
 

@@ -12,12 +12,13 @@ AsyncWebServer ASYNC_SERVER(80);
 
 #define    INPIN                  D8    // INPUT from Switch
 
-const char* AP_SSID = "S3XY_Buttton";
-const char* AP_PASSWD = "9548951411!";
-String WiFI_SSID = "SheltAirGuestWiFi";
-String WiFi_PASSWD = "1234567890!";
-//String WiFI_SSID = "3844-Main-2.4G";
-//String WiFi_PASSWD = "9548951411!";
+const char* AP_SSID         = "S3XY_Buttton";
+const char* AP_PASSWD       = "9548951411!";
+String WiFI_SSID            = "SheltAirGuestWiFi";
+String WiFi_PASSWD          = "1234567890!";
+//String WiFI_SSID          = "3844-Main-2.4G";
+//String WiFi_PASSWD        = "9548951411!";
+const char* hostName        = "s3xy";
 
 long delayLowMin;
 long delayLowMax;
@@ -25,8 +26,10 @@ long delayLowMax;
 bool powerSwitch                = false;
 bool useSwitch                  = true;
 
-unsigned long timeNow           = 0;
-unsigned long delayBy           = 0;
+unsigned long timeNow            = 0;
+unsigned long delayBy            = 0;
+unsigned long lastWiFi           = 0;
+unsigned long WiFiReconnectInt   = 30000;
 
 OneButton btn;
 
@@ -92,14 +95,14 @@ static void toggleSwitch() {
   LOG(Debug, "Switch function toggled!!");
 }
 
-void onConnected() {
+void onS3XYConnected() {
   blinkLED(2);
-  LOG(Debug, "[user] connected"); 
+  LOG(Debug, "Virtural S3XY Button Connected"); 
 }
 
-void onDisconnected() {
+void onS3XYDisconnected() {
   blinkLED(2);
-  LOG(Debug, "[user] disconnected");
+  LOG(Debug, "Virtural S3XY Button Connected"); 
 }
 
 String htmlProcessor(const String& var) {
@@ -111,16 +114,48 @@ String htmlProcessor(const String& var) {
   return " ";
 }
 
-void setup() {
-  
-  blinkLED(3);
+void WiFiEvent(WiFiEvent_t event) {
+  switch(event) {
+      case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+        LOG(Debug, "Connected to AP: %s", "test:" );
+        break;
 
+      case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+        LOG(Debug, "DHCP WiFi IP: %s", WiFi.localIP().toString().c_str() );
+        LOG(Debug, "WiFi Mac Address: %s", WiFi.macAddress().c_str() );
+        break;
+
+      case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        LOG(Debug, "Not Connected to a WiFI Router/AP. Trying to Reconnecting...");
+        WiFi.begin(WiFI_SSID, WiFi_PASSWD);
+        break;
+
+      case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
+        LOG(Debug, "Someone connected to the AP...");
+        break;
+      
+      case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
+        LOG(Debug, "Someone disconnected to the AP...");
+        break;
+
+      case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:
+        LOG(Debug, "AP IP Assigned: %s", WiFi.softAPIP().toString());
+
+        break;
+
+      default:
+        break;
+  }
+}
+
+void setup() {  
   Serial.begin(115200);
-  //delay(1000);
-  delay(5000);
-  
+  blinkLED(3);
+  delay(1000);
+  LOG(Debug, "Power on. Setup Begins");
   LOG(Debug, "Setting up AP");
-  WiFi.setHostname("s3xy");
+  WiFi.setHostname(hostName);
+  WiFi.onEvent(WiFiEvent);
   WiFi.mode(WIFI_AP_STA);
   LOG(Debug, "AP IP address: %s", WiFi.softAPIP().toString() );
   LOG(Debug, "AP MAC Address: %s", WiFi.softAPmacAddress().c_str() );
@@ -128,16 +163,13 @@ void setup() {
   delay(1000);
 
   WiFi.begin(WiFI_SSID, WiFi_PASSWD);
-  LOG(Debug, "Connectiong to WiFi Router");
+  LOG(Debug, "Connectiong to WiFi Router if available...");
   int x = 0;
   while ( (WiFi.status() != WL_CONNECTED) && (x < 10) ) {
     delay(1000);
     LOG(Debug, ".%d", x);
     x++;
   }
-
-  LOG(Debug, "DHCP WiFi IP %s", WiFi.localIP().toString().c_str() );
-  LOG(Debug, "WiFi Mac Address: %s", WiFi.macAddress().c_str() );
 
   ASYNC_SERVER.on("/", HTTP_GET, [](AsyncWebServerRequest *my_request) {
     my_request->send(200, "text/html", index_html, htmlProcessor);
@@ -170,16 +202,15 @@ void setup() {
 
   ASYNC_SERVER.begin();
 
-  s3xy_on_connect(onConnected);
-  s3xy_on_disconnect(onDisconnected);
+  s3xy_on_connect(onS3XYConnected);
+  s3xy_on_disconnect(onS3XYDisconnected);
   s3xy_begin("ENH_BTN");
-
-  LOG(Debug, "Setup Begins");
 
   pinMode(INPIN, INPUT);    
   pinMode(LED_BUILTIN, OUTPUT);
 
   timeNow = millis();
+  lastWiFi = millis();
   randomize();
 
   btn.setup(INPIN, INPUT_PULLUP, false);
@@ -198,9 +229,9 @@ void setup() {
 void loop() {
   //s3xy_loop();
 
-  if (s3xy_ready() ) {
+  //if (s3xy_ready() ) {
     //save this for referance
-  }
+  //}
   
   if ( useSwitch ) {
       btn.tick();   //Capture control button status
@@ -212,5 +243,4 @@ void loop() {
     timeNow = millis();
     randomize();
   }
-  
 }

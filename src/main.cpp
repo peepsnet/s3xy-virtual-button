@@ -1,9 +1,13 @@
 #include <Arduino.h>
-#include "S3XYButton.h"
+#include <Logger.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <OneButton.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include <Logger.h>
+#include "S3XYButton.h"
 #include "html.h"
 
 Logger logger(Debug, "[{time}] {level}: [{file}.{function}.{lineno}] {message}");
@@ -12,22 +16,27 @@ AsyncWebServer ASYNC_SERVER(80);
 
 #define    INPIN                  D8    // INPUT from Switch
 
-const char* AP_SSID         = "S3XY_Buttton";
-const char* AP_PASSWD       = "9548951411!";
-String WiFI_SSID            = "SheltAirGuestWiFi";
-String WiFi_PASSWD          = "1234567890!";
-//String WiFI_SSID          = "3844-Main-2.4G";
-//String WiFi_PASSWD        = "9548951411!";
-const char* hostName        = "s3xy";
+#define SCREEN_WIDTH              128 // OLED display width,  in pixels
+#define SCREEN_HEIGHT             64 // OLED display height, in pixels
+// declare an SSD1306 display object connected to I2C
+Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+const char* AP_SSID               = "S3XY_Buttton";
+const char* AP_PASSWD             = "9548951411!";
+String WiFI_SSID                  = "SheltAirGuestWiFi";
+String WiFi_PASSWD                = "1234567890!";
+//String WiFI_SSID                = "3844-Main-2.4G";
+//String WiFi_PASSWD              = "";
+const char* hostName              = "s3xy";
 
 long delayLowMin;
 long delayLowMax;
 
-bool powerSwitch                = false;
-bool useSwitch                  = true;
+bool powerSwitch                  = false;
+bool useSwitch                    = true;
 
-unsigned long timeNow            = 0;
-unsigned long delayBy            = 0;
+unsigned long timeNow             = 0;
+unsigned long delayBy             = 0;
 
 OneButton btn;
 
@@ -37,6 +46,28 @@ static void randomize() {
   delayBy                          = random(delayLowMin, delayLowMax);
 }
 
+void oled_init() {
+  int attempts = 0;
+  const int maxAttempts = 5;
+  bool initialized = false;
+
+  while (attempts < maxAttempts && !initialized) {
+      initialized = oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+      if (!initialized) {
+          LOG(Debug, "SSD1306 allocation failed, retrying...");
+          attempts++;
+          delay(1000); // Wait before retrying
+      }
+  }
+
+  if (!initialized) {
+      LOG(Debug, "Failed to initialize SSD1306 after several attempts.");
+  } else {
+      LOG(Debug, "SSD1306 initialized successfully.");
+      oled.clearDisplay();
+      oled.display();
+  }
+}
 
 static void setLED() {
   if (powerSwitch) {
@@ -149,7 +180,12 @@ void WiFiEvent(WiFiEvent_t event) {
 void setup() {  
   Serial.begin(115200);
   blinkLED(3);
+
+  oled_init();  
+
   delay(1000);
+  oled.clearDisplay();
+
   LOG(Debug, "Power on. Setup Begins");
   LOG(Debug, "Setting up AP");
   WiFi.setHostname(hostName);

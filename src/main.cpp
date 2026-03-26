@@ -28,8 +28,6 @@ bool useSwitch                  = true;
 
 unsigned long timeNow            = 0;
 unsigned long delayBy            = 0;
-unsigned long lastWiFi           = 0;
-unsigned long WiFiReconnectInt   = 30000;
 
 OneButton btn;
 
@@ -210,7 +208,6 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   timeNow = millis();
-  lastWiFi = millis();
   randomize();
 
   btn.setup(INPIN, INPUT_PULLUP, false);
